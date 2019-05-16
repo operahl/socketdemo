@@ -24,7 +24,7 @@ A socket server which achieve following function by native Go http package:
  
  
 
-##Example: 
+# Example: 
 ```
 //modify a controller in /utils/router.go
 type EchoController struct  {
