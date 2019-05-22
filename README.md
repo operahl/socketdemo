@@ -17,10 +17,8 @@ A socket server which achieve following function by native Go http package:
  1. 自定义通讯协议
  
  2. 通过心跳机制维护连接
- 
- 3. 从配置文件中读取系统参数
- 
- 4. 通过 router-controller 机制解耦服务器
+  
+ 3. 通过 router-controller 机制解耦服务器
  
  
 
@@ -51,7 +49,7 @@ func init() {
 
 //after setting parameters in config.yaml, run server.go
 func main() {
-	startServer("./conf/config.yaml")
+	startServer()
 }
 
 ```

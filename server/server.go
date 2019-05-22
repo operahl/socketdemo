@@ -6,18 +6,16 @@ import (
 )
 
 const (
-	HOST = "localhost:9988"
-	BEATINGINTERVAL = 5
-	BYTES_SIZE uint16 = 1024
-	HEAD_SIZE  int    = 2
+	HOST = "localhost:9988"//服务启动监听端口
+	BEATINGINTERVAL = 5//心跳时间
 )
 
 func main() {
-	startServer("./conf/config.yaml")
+	startServer()
 }
 
 
-func startServer(configpath string){
+func startServer(){
 	netListen, err := net.Listen("tcp", HOST)
 	utils.CheckError(err)
 	defer netListen.Close()
@@ -31,7 +29,6 @@ func startServer(configpath string){
 
 		utils.Log(conn.RemoteAddr().String(), " tcp connect success")
 		go handleConnection(conn, BEATINGINTERVAL)
-		//go doConn(conn)
 	}
 
 }
@@ -69,10 +66,8 @@ func reader(conn net.Conn,heartbeatchan chan int,readerChannel chan []byte) {
 		select {
 
 		case data := <-readerChannel:
-
 			heartbeatchan<-1//心跳
 			utils.RespData(data,conn)
-
 		}
 
 	}
