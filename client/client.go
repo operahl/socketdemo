@@ -1,18 +1,18 @@
 package main
 
 import (
-
+	"../utils"
+	"encoding/binary"
+	"encoding/json"
 	"fmt"
 	"net"
 	"os"
-	"time"
 	"strconv"
-	"../utils"
-	"encoding/json"
+	"time"
 )
 
 const (
-	SERVER = "localhost:1024"
+	SERVER = "localhost:9988"
 )
 
 type Msg struct {
@@ -20,7 +20,13 @@ type Msg struct {
 	Content interface{}            `json:"content"`
 }
 
+
 func send(conn net.Conn) {
+
+	var headSize int
+	var headBytes = make([]byte, 2)
+	//接收数据
+	go ReceiveData(conn)
 	for i := 0; i <3; i++ {
 		session:=GetSession()
 		message := &Msg{
@@ -30,20 +36,40 @@ func send(conn net.Conn) {
 			},
 		Content: Msg{
 			Meta:map[string]interface{}{
-			"author":"nucky lu",
+			"author":"jack",
 			},
 		Content:session,
 		},
 		}
 		result,_ :=	json.Marshal(message)
-		byteData:=utils.Enpack((result))
-		fmt.Println(byteData)
+		headSize =len(result)
+		utils.LogErr(headSize)
+		binary.BigEndian.PutUint16(headBytes, uint16(headSize))
+
+		byteData:=utils.Packet([]byte(result))
+		utils.Log("send data",byteData)
 		conn.Write(byteData)
-		//conn.Write([]byte(message))
+
 		time.Sleep(1 * time.Second)
 	}
-	fmt.Println("send over")
+
+	//测试服务端超时
+	time.Sleep(10 * time.Second)
+	utils.Log("send over")
 	defer conn.Close()
+}
+
+func ReceiveData(conn net.Conn)  {
+	//buffer := make([]byte, 1024)
+	//n, err := conn.Read(buffer)
+	//if err != nil {
+	//	utils.LogErr(conn.RemoteAddr().String(), " connection error: ", err)
+	//	return
+	//}
+	//utils.Log( "receive data string:", string(buffer[:n]))
+
+	//TODO 后期也要处理粘包与半包，处理规则与server端一致
+	utils.Log( "receive data ...")
 }
 
 func GetSession() string{

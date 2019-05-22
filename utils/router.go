@@ -28,6 +28,16 @@ type Controller interface {
 
 var routers [][2]interface{}
 
+
+func init() {
+	var echo EchoController
+	routers = make([][2]interface{} ,0 , 20)
+	Route(func(entry Msg)bool{
+		if entry.Meta["meta"]=="test"{
+			return true}
+		return  false
+	},&echo)
+}
 func Route(pred interface{} ,controller Controller) {
 	switch pred.(type) {
 	case func(entry Msg)bool:{
@@ -61,7 +71,7 @@ func Route(pred interface{} ,controller Controller) {
 }
 
 
-func TaskDeliver(postdata []byte,conn net.Conn){
+func RespData(postdata []byte,conn net.Conn){
 	for _ ,v := range routers{
 		pred := v[0]
 		act := v[1]
@@ -72,6 +82,7 @@ func TaskDeliver(postdata []byte,conn net.Conn){
 		}
 		if pred.(func(entermsg Msg)bool)(entermsg) {
 			result := act.(Controller).Excute(entermsg)
+			result =Packet(result)
 			conn.Write(result)
 			return
 		}
@@ -92,18 +103,8 @@ type EchoController struct  {
 
 func (this *EchoController) Excute(message Msg)[]byte {
 	mirrormsg,err :=json.Marshal(message)
-	Log("echo the message:", string(mirrormsg))
+	Log("response the message:", string(mirrormsg))
 	CheckError(err)
 	return mirrormsg
 }
 
-
-func init() {
-	var echo EchoController
-	routers = make([][2]interface{} ,0 , 20)
-	Route(func(entry Msg)bool{
-		if entry.Meta["meta"]=="test"{
-			return true}
-		return  false
-	},&echo)
-}
